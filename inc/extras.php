@@ -87,35 +87,46 @@ function custom_password_form() {
  */
 add_filter( 'the_content', 'dazzling_add_custom_table_class' );
 function dazzling_add_custom_table_class( $content ) {
-    return str_replace( '<table>', '<table class="table table-hover">', $content );
+  return str_replace( '<table>', '<table class="table table-hover">', $content );
 }
 
-if ( ! function_exists( 'sparkling_social_icons' ) ) :
+if ( ! function_exists( 'dazzling_social_icons' ) ) :
 /**
  * Display social links in footer and widgets
- *
- * @package sparkling
  */
 function dazzling_social_icons(){
   if ( has_nav_menu( 'social-menu' ) ) {
   	wp_nav_menu(
-  		array(
-  			'theme_location'  => 'social-menu',
-  			'container'       => 'nav',
-  			'container_id'    => 'social',
-  			'container_class' => 'social-icon',
-  			'menu_id'         => 'menu-social-items',
-  			'menu_class'      => 'social-menu',
-  			'depth'           => 1,
-  			'fallback_cb'     => '',
-                        'link_before'     => '<i class="social_icon fa"><span>',
-                        'link_after'      => '</span></i>'
-  		)
-	  );
+      array(
+        'theme_location'  => 'social-menu',
+        'container'       => 'nav',
+        'container_id'    => 'social',
+        'container_class' => 'social-icon',
+        'menu_id'         => 'menu-social-items',
+        'menu_class'      => 'social-menu',
+        'depth'           => 1,
+        'fallback_cb'     => '',
+        'link_before'     => '<i class="social_icon fa"><span>',
+        'link_after'      => '</span></i>'
+      )
+    );
   }
 }
 endif;
 
+
+if( !function_exists( 'dazzling_social' ) ) :
+/**
+ * Fallback function for the deprecated function dazzling_social
+ */
+function dazzling_social(){
+  if( of_get_option('footer_social') ) {
+    dazzling_social_icons();
+  }
+}
+endif;
+
+if( !function_exists( 'dazzling_header_menu' ) ) :
 /**
  * header menu (should you choose to use one)
  */
@@ -127,12 +138,13 @@ function dazzling_header_menu() {
     'depth'             => 2,
     'container'         => 'div',
     'container_class'   => 'collapse navbar-collapse navbar-ex1-collapse',
+    'container_id'	=> 'navbar',
     'menu_class'        => 'nav navbar-nav',
     'fallback_cb'       => 'wp_bootstrap_navwalker::fallback',
     'walker'            => new wp_bootstrap_navwalker()
   ));
 } /* end header menu */
-
+endif;
 
 /**
  * footer menu (should you choose to use one)
@@ -171,10 +183,10 @@ function dazzling_getPostViews($postID){
 function dazzling_setPostViews($postID) {
     $count_key = 'post_views_count';
     $count = (int)get_post_meta($postID, $count_key, true);
-    if($count==''){
-        $count = 0;
+    if($count == 0){
+        $count = 1;
         delete_post_meta($postID, $count_key);
-        add_post_meta($postID, $count_key, 0);
+        add_post_meta($postID, $count_key, $count);
     }else{
         $count++;
         update_post_meta($postID, $count_key, $count);
@@ -219,6 +231,7 @@ function dazzling_featured_slider() {
 
             if ( $count && $slidecat ) {
             $query = new WP_Query( array( 'cat' => $slidecat, 'posts_per_page' => $count ) );
+//            print_r($query);
             if ($query->have_posts()) :
               while ($query->have_posts()) : $query->the_post();
 
